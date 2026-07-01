@@ -71,39 +71,44 @@
         "Satellite (Esri World Imagery)": esriSatellite
     },
     {
-        "LiDAR Overlay": spkLidar
+        "LiDAR Overlay": SPKLiDAR
     }
 ).addTo(map);
 
   // Markers
- fetch("data/SPK points.geojson")
+ fetch("data/SPK_points.geojson")
   .then(response => response.json())
   .then(data => {
 
-    var monumentLayer = L.geoJSON(data, {
+  var monumentLayer = L.geoJSON(data, {
 
-  pointToLayer: function(feature, latlng) {
-    return L.marker(latlng);
-  },
+    pointToLayer: function(feature, latlng) {
+      return L.marker(latlng);
+    },
 
-  onEachFeature: function(feature, layer) {
+    onEachFeature: function(feature, layer) {
 
-    layer.bindTooltip(
-      feature.properties.ID,
-      {
-        permanent: map.getZoom() >= 16,
-        direction: "top",
-        offset: [0, -10],
-        className: "site-label"
-      }
-    );
+      layer.bindTooltip(
+        feature.properties.ID,
+        {
+          permanent: map.getZoom() >= 16,
+          direction: "top",
+          offset: [0, -10],
+          className: "site-label"
+        }
+      );
 
-    layer.bindPopup(
-      "<h3>" + feature.properties.ID + "</h3>" +
-      "<p>Condition report coming soon.</p>"
-    );
+      layer.bindPopup(
+        "<h3>" + feature.properties.ID + "</h3>" +
+        "<p>Condition report coming soon.</p>"
+      );
 
-  }
+    }
+
+  });
+
+  monumentLayer.addTo(map);
+  layerControl.addOverlay(monumentLayer, "Monuments");
 
 });
 
