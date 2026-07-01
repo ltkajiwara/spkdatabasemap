@@ -54,6 +54,13 @@
     { attribution: "Tiles © Esri" }
   );
 
+  const SPKLiDAR = L.imageOverlay(
+  "spklidar_export.png",
+  [[12.8551990103299296, 105.0050093884005946],
+   [12.9290341513722495, 105.0620006863127998]],
+  { opacity: 0.7 }
+);
+
   // Default layer
   osm.addTo(map);
 
@@ -62,6 +69,9 @@
     {
         "OpenStreetMap (Default)": osm,
         "Satellite (Esri World Imagery)": esriSatellite
+    },
+    {
+        "LiDAR Overlay": spkLidar
     }
 ).addTo(map);
 
