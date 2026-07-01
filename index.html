@@ -4,36 +4,24 @@
   <title>Sambor Prei Kuk Area Map</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
   <style>
     #map { height: 550px; width: 100%; }
 
-    .pano-btn {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 14px 24px;
-      background: #0066cc;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      text-decoration: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .pano-btn:hover { background: #0055aa; }
-
     .site-label {
-    background: rgba(255,255,255,0.85);
-    border: 1px solid #666;
-    border-radius: 4px;
-    box-shadow: none;
-    color: black;
-    font-weight: bold;
-    font-size: 11px;
-    padding: 2px 5px;
-}
+      background: rgba(255,255,255,0.85);
+      border: 1px solid #666;
+      border-radius: 4px;
+      color: black;
+      font-weight: bold;
+      font-size: 11px;
+      padding: 2px 5px;
+    }
   </style>
 </head>
+
 <body>
 
 <div id="map"></div>
@@ -41,76 +29,97 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-  const map = L.map('map').setView([12.869589,105.039448], 14);
+  // -------------------------
+  // 1. MAP INIT
+  // -------------------------
+  const map = L.map('map').setView([12.869589, 105.039448], 14);
 
-  // --- Base map layers ---
+  // -------------------------
+  // 2. BASE LAYERS
+  // -------------------------
   const osm = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     { attribution: '© OpenStreetMap contributors' }
   );
- 
+
   const esriSatellite = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     { attribution: "Tiles © Esri" }
   );
 
-  const SPKLiDAR = L.imageOverlay(
-  "spklidar_export.png",
-  [[12.8551990103299296, 105.0050093884005946],
-   [12.9290341513722495, 105.0620006863127998]],
-  { opacity: 0.7 }
-);
-
-  // Default layer
   osm.addTo(map);
 
-  // Layer switcher
- const layerControl = L.control.layers(
+  // -------------------------
+  // 3. LIDAR OVERLAY
+  // -------------------------
+  const spkLidar = L.imageOverlay(
+    "./spklidar_export.png",
+    [
+      [12.8551990103299296, 105.0050093884005946],
+      [12.9290341513722495, 105.0620006863127998]
+    ],
+    { opacity: 0.7 }
+  );
+
+  // -------------------------
+  // 4. LAYER CONTROL
+  // -------------------------
+  const layerControl = L.control.layers(
     {
-        "OpenStreetMap (Default)": osm,
-        "Satellite (Esri World Imagery)": esriSatellite
+      "OpenStreetMap (Default)": osm,
+      "Satellite (Esri World Imagery)": esriSatellite
     },
     {
-        "LiDAR Overlay": SPKLiDAR
+      "LiDAR Overlay": spkLidar
     }
-).addTo(map);
+  ).addTo(map);
 
-  // Markers
- fetch("data/SPK_points.geojson")
-  .then(response => response.json())
-  .then(data => {
+  // -------------------------
+  // 5. GEOJSON (SAFE LOAD)
+  // -------------------------
+  fetch("./SPK_points.geojson")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("GeoJSON file not found or failed to load");
+      }
+      return response.json();
+    })
+    .then(data => {
 
-  var monumentLayer = L.geoJSON(data, {
+      const monumentLayer = L.geoJSON(data, {
 
-    pointToLayer: function(feature, latlng) {
-      return L.marker(latlng);
-    },
+        pointToLayer: function(feature, latlng) {
+          return L.marker(latlng);
+        },
 
-    onEachFeature: function(feature, layer) {
+        onEachFeature: function(feature, layer) {
 
-      layer.bindTooltip(
-        feature.properties.ID,
-        {
-          permanent: map.getZoom() >= 16,
-          direction: "top",
-          offset: [0, -10],
-          className: "site-label"
+          layer.bindTooltip(
+            feature.properties.ID,
+            {
+              permanent: map.getZoom() >= 16,
+              direction: "top",
+              offset: [0, -10],
+              className: "site-label"
+            }
+          );
+
+          layer.bindPopup(
+            "<h3>" + feature.properties.ID + "</h3>" +
+            "<p>Condition report coming soon.</p>"
+          );
+
         }
-      );
 
-      layer.bindPopup(
-        "<h3>" + feature.properties.ID + "</h3>" +
-        "<p>Condition report coming soon.</p>"
-      );
+      });
 
-    }
+      monumentLayer.addTo(map);
+      layerControl.addOverlay(monumentLayer, "Monuments");
 
-  });
-
-  monumentLayer.addTo(map);
-  layerControl.addOverlay(monumentLayer, "Monuments");
-
-});
+    })
+    .catch(err => {
+      console.error("GeoJSON load error:", err);
+    });
 
 </script>
 
