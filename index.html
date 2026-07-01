@@ -82,43 +82,30 @@
 
     var monumentLayer = L.geoJSON(data, {
 
-      pointToLayer: function(feature, latlng) {
+  pointToLayer: function(feature, latlng) {
     return L.marker(latlng);
-},
+  },
 
-      },
+  onEachFeature: function(feature, layer) {
 
-      onEachFeature: function(feature, layer) {
-
-        // Permanent label
-        layer.bindTooltip(
-          feature.properties.ID,
-          {
-            permanent: map.getZoom() >= 16,
-            direction: "top",
-            offset: [0, -10],
-            className: "site-label"
-          }
-        );
-
-        // Click popup
-        layer.bindPopup(`
-    <h3>${feature.properties.ID}</h3>
-    <p>Condition report coming soon.</p>
-`);
-
+    layer.bindTooltip(
+      feature.properties.ID,
+      {
+        permanent: map.getZoom() >= 16,
+        direction: "top",
+        offset: [0, -10],
+        className: "site-label"
       }
-
-    });
-
-        monumentLayer.addTo(map);
-
-    layerControl.addOverlay(
-        monumentLayer,
-        "Monuments"
     );
 
-  });
+    layer.bindPopup(
+      "<h3>" + feature.properties.ID + "</h3>" +
+      "<p>Condition report coming soon.</p>"
+    );
+
+  }
+
+});
 
 </script>
 
