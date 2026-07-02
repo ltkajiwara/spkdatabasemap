@@ -77,6 +77,36 @@
   // -------------------------
   // 5. GEOJSON (SAFE LOAD)
   // -------------------------
+  const blueIcon = new L.Icon({
+    iconUrl: "./markers/marker-icon-blue.png",
+    shadowUrl: "./markers/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
+});
+
+const redIcon = new L.Icon({
+    iconUrl: "./markers/marker-icon-red.png",
+    shadowUrl: "./markers/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
+});
+
+const greenIcon = new L.Icon({
+    iconUrl: "./markers/marker-icon-green.png",
+    shadowUrl: "./markers/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
+});
+  
   fetch("./SPK_points.geojson")
     .then(response => {
       if (!response.ok) {
@@ -89,8 +119,24 @@
       const monumentLayer = L.geoJSON(data, {
 
         pointToLayer: function(feature, latlng) {
-          return L.marker(latlng);
-        },
+
+    const id = feature.properties.ID;
+
+    let icon = blueIcon;
+
+    if (id.startsWith("N")) {
+        icon = blueIcon;
+    } else if (id.startsWith("C")) {
+        icon = greenIcon;
+    } else if (id.startsWith("S")) {
+        icon = redIcon;
+    }
+
+    return L.marker(latlng, {
+        icon: icon
+    });
+
+},
 
         onEachFeature: function(feature, layer) {
 
